@@ -162,10 +162,10 @@ export default function Checkout({
     zip: '',
   });
 
-  const cartItems = Object.entries(cart).map(([productId, quantity]) => {
-    // This would normally fetch from products array
-    return { productId, quantity };
-  });
+  // const cartItems = Object.entries(cart).map(([productId, quantity]) => {
+  //   // This would normally fetch from products array
+  //   return { productId, quantity };
+  // });
 
   const subtotal = 50; // This would be calculated from cart
   const boxPrice = selectedBoxSize === 'small' ? 15.99 : selectedBoxSize === 'medium' ? 24.99 : 34.99;

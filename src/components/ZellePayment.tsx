@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, CheckCircle, Clock } from 'lucide-react';
 import { products } from '@/lib/products';
 
@@ -48,16 +48,7 @@ export default function ZellePayment({
   const boxPrice = selectedBoxSize === 'small' ? 15.99 : selectedBoxSize === 'medium' ? 24.99 : 34.99;
   const total = subtotal + boxPrice + shippingCost;
 
-  // Generate order ID and save to Notion when component mounts
-  useEffect(() => {
-    if (isOpen && !orderId) {
-      const newOrderId = `JP-${Date.now()}`;
-      setOrderId(newOrderId);
-      saveOrderToNotion(newOrderId);
-    }
-  }, [isOpen, orderId]);
-
-  const saveOrderToNotion = async (orderId: string) => {
+  const saveOrderToNotion = useCallback(async (orderId: string) => {
     try {
       const orderData = {
         orderId,
@@ -90,7 +81,16 @@ export default function ZellePayment({
     } catch (error) {
       console.error('Error saving order to Notion:', error);
     }
-  };
+  }, [customerInfo, cartItems, selectedBoxSize, shippingCost, total, subtotal, boxPrice]);
+
+  // Generate order ID and save to Notion when component mounts
+  useEffect(() => {
+    if (isOpen && !orderId) {
+      const newOrderId = `JP-${Date.now()}`;
+      setOrderId(newOrderId);
+      saveOrderToNotion(newOrderId);
+    }
+  }, [isOpen, orderId, saveOrderToNotion]);
 
   const handlePaymentComplete = () => {
     onOrderComplete(orderId);
@@ -175,7 +175,7 @@ export default function ZellePayment({
               <div className="text-sm text-gray-600 space-y-1">
                 <p>• Include Order ID: <span className="font-mono font-bold">{orderId}</span></p>
                 <p>• Payment will be confirmed within 24 hours</p>
-                <p>• You'll receive email confirmation once processed</p>
+                <p>• You&apos;ll receive email confirmation once processed</p>
               </div>
             </div>
 
@@ -195,14 +195,14 @@ export default function ZellePayment({
                 onClick={onClose}
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
               >
-                I'll Pay Later
+                I&apos;ll Pay Later
               </button>
               <button
                 onClick={handlePaymentComplete}
                 className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
               >
                 <Clock className="h-4 w-4" />
-                I've Sent Payment
+                I&apos;ve Sent Payment
               </button>
             </div>
           </div>
