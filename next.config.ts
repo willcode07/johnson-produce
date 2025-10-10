@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true
   },
+  distDir: 'out',
   // Remove basePath and assetPrefix for GitHub Pages root deployment
 };
 
