@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Johnson Produce - Fresh Tropical Fruits",
-  description: "Premium quality tropical fruits delivered fresh to your door. From our family farm to your family table.",
+  description: "Premium quality tropical fruits delivered fresh to your door. From our family farm to your family table. Live site v1.1",
 };
 
 export default function RootLayout({
