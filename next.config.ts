@@ -6,8 +6,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/johnson-produce' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/johnson-produce' : '',
+  // Remove basePath and assetPrefix for GitHub Pages root deployment
 };
 
 export default nextConfig;
