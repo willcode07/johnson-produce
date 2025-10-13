@@ -2,6 +2,8 @@
 
 A modern, responsive ecommerce website for Johnson Produce, a family business specializing in premium tropical fruits. Built with Next.js, TypeScript, and Tailwind CSS.
 
+🌐 **Live Site**: https://willcode07.github.io/johnson-produce/
+
 ![Johnson Produce](https://img.shields.io/badge/Next.js-15.5.3-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=for-the-badge&logo=tailwind-css)
