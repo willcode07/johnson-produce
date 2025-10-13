@@ -7,7 +7,8 @@ const nextConfig: NextConfig = {
     unoptimized: true
   },
   distDir: 'out',
-  // Remove basePath and assetPrefix for GitHub Pages root deployment
+  basePath: '/johnson-produce',
+  assetPrefix: '/johnson-produce',
 };
 
 export default nextConfig;
