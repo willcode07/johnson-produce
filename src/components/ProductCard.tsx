@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Product } from '@/lib/products';
 import { Plus, Minus } from 'lucide-react';
+import ProductImageSlider from './ProductImageSlider';
 
 interface ProductCardProps {
   product: Product;
@@ -18,12 +19,19 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     setQuantity(1);
   };
 
+  // Get images array - use new images array if available, otherwise fall back to single image
+  const productImages = product.images && product.images.length > 0 
+    ? product.images 
+    : [product.image];
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-        <div className="w-full h-48 bg-gradient-to-br from-green-50 to-amber-50 flex items-center justify-center">
-          <span className="text-6xl">🥭</span>
-        </div>
+        <ProductImageSlider 
+          images={productImages}
+          primaryImageIndex={product.primaryImageIndex ?? 0}
+          productName={product.name}
+        />
       </div>
       
       <div className="p-6">
