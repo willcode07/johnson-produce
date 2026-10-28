@@ -1,18 +1,28 @@
 import type { NextConfig } from "next";
 
+/**
+ * GitHub Pages serves this project at /johnson-produce/.
+ * `output: 'export'` writes the static site to ./out, which
+ * .github/workflows/nextjs.yml uploads as the Pages artifact.
+ * basePath is always on so local dev matches the deployed asset paths
+ * (open http://localhost:3000/johnson-produce/).
+ */
+const basePath = "/johnson-produce";
+
 const nextConfig: NextConfig = {
-  // Remove static export to enable API routes for admin dashboard
-  // Set output: 'export' only when building for static hosting
+  output: "export",
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
-  // Note: For App Router, body size limits are handled in route handlers
-  // The MAX_FILE_SIZE constant in the upload route controls the limit
-  // Comment out basePath for local development
-  // Uncomment when deploying to a subdirectory
-  // basePath: '/johnson-produce',
-  // assetPrefix: '/johnson-produce',
+  // Last working Pages config published this directory. Next still
+  // builds intermediates in .next and copies the site to ./out.
+  distDir: "out",
+  basePath,
+  assetPrefix: basePath,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
 };
 
 export default nextConfig;
