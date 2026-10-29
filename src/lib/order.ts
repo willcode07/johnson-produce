@@ -1,8 +1,11 @@
 import {
-  formatProductPrice,
+  formatOptionPrice,
+  hasChoiceOptions,
   inSeasonProducts,
   isInSeason,
-  quantityLabel,
+  optionKey,
+  productOptions,
+  quantityLabelForUnit,
   type Product,
 } from '@/lib/products';
 
@@ -24,24 +27,44 @@ export const FORM_ACTION = `https://formsubmit.co/${ORDER_EMAIL}`;
 /** Where FormSubmit sends the customer after a successful post. */
 export const ORDER_THANKS_URL = 'https://willcode07.github.io/johnson-produce/order/thanks/';
 
+export type Fulfillment = '' | 'pickup' | 'delivery' | 'shipping';
+
 export interface OrderDraft {
   name: string;
   phone: string;
   email: string;
+  /** Keys are optionKey(productId, optionId). */
   quantities: Record<string, number>;
-  fulfillment: '' | 'pickup' | 'delivery';
+  fulfillment: Fulfillment;
   address: string;
+  shipName: string;
+  shipStreet: string;
+  shipApt: string;
+  shipCity: string;
+  shipState: string;
+  shipZip: string;
   date: string;
   notes: string;
 }
 
 export type OrderErrors = Partial<Record<
-  'name' | 'phone' | 'email' | 'items' | 'fulfillment' | 'address' | 'date',
+  'name' | 'phone' | 'email' | 'items' | 'fulfillment' | 'address' | 'date'
+  | 'shipName' | 'shipStreet' | 'shipCity' | 'shipState' | 'shipZip',
   string
 >>;
 
 export function emptyQuantities(list: Product[] = inSeasonProducts()): Record<string, number> {
-  return Object.fromEntries(list.filter(isInSeason).map((product) => [product.id, 0]));
+  const quantities: Record<string, number> = {};
+  for (const product of list.filter(isInSeason)) {
+    for (const option of productOptions(product)) {
+      quantities[optionKey(product.id, option.id)] = 0;
+    }
+  }
+  return quantities;
+}
+
+export function lineLabel(product: Product, optionName: string): string {
+  return hasChoiceOptions(product) ? `${product.name} — ${optionName}` : product.name;
 }
 
 export function validateOrder(draft: OrderDraft, list: Product[] = inSeasonProducts()): OrderErrors {
@@ -65,24 +88,37 @@ export function validateOrder(draft: OrderDraft, list: Product[] = inSeasonProdu
   let itemError: string | undefined;
   let total = 0;
   for (const product of available) {
-    const qty = draft.quantities[product.id] ?? 0;
-    if (!Number.isInteger(qty) || qty < 0 || qty > 99) {
-      itemError = 'Quantities must be whole numbers from 0 to 99.';
-      break;
+    for (const option of productOptions(product)) {
+      const qty = draft.quantities[optionKey(product.id, option.id)] ?? 0;
+      if (!Number.isInteger(qty) || qty < 0 || qty > 99) {
+        itemError = 'Quantities must be whole numbers from 0 to 99.';
+        break;
+      }
+      total += qty;
     }
-    total += qty;
+    if (itemError) break;
   }
   if (!itemError && total < 1) {
     itemError = 'Add a quantity for at least one fruit.';
   }
   if (itemError) errors.items = itemError;
 
-  if (draft.fulfillment !== 'pickup' && draft.fulfillment !== 'delivery') {
-    errors.fulfillment = 'Choose pickup or delivery.';
+  if (draft.fulfillment !== 'pickup' && draft.fulfillment !== 'delivery' && draft.fulfillment !== 'shipping') {
+    errors.fulfillment = 'Choose pickup, delivery, or shipping.';
   }
 
   if (draft.fulfillment === 'delivery' && draft.address.trim().length < 3) {
     errors.address = 'Enter a delivery address or area.';
+  }
+
+  if (draft.fulfillment === 'shipping') {
+    if (draft.shipName.trim().length < 2) errors.shipName = 'Enter the recipient name.';
+    if (draft.shipStreet.trim().length < 3) errors.shipStreet = 'Enter a street address.';
+    if (draft.shipCity.trim().length < 2) errors.shipCity = 'Enter a city.';
+    if (draft.shipState.trim().length < 2) errors.shipState = 'Enter a state.';
+    if (!/^\d{5}(-\d{4})?$/.test(draft.shipZip.trim())) {
+      errors.shipZip = 'Enter a 5-digit ZIP code.';
+    }
   }
 
   if (!draft.date) {
@@ -102,13 +138,26 @@ export function validateOrder(draft: OrderDraft, list: Product[] = inSeasonProdu
 }
 
 export function orderLines(draft: OrderDraft, list: Product[] = inSeasonProducts()): string[] {
-  return list.filter(isInSeason).flatMap((product) => {
-    const qty = draft.quantities[product.id] ?? 0;
-    if (qty <= 0) return [];
-    return [
-      `${product.name}: ${qty} ${quantityLabel(product, qty)} (${formatProductPrice(product)})`,
-    ];
-  });
+  return list.filter(isInSeason).flatMap((product) => (
+    productOptions(product).flatMap((option) => {
+      const qty = draft.quantities[optionKey(product.id, option.id)] ?? 0;
+      if (qty <= 0) return [];
+      const noun = quantityLabelForUnit(option.unit, qty);
+      return [
+        `${lineLabel(product, option.name)}: ${qty} ${noun} (${formatOptionPrice(option)})`,
+      ];
+    })
+  ));
+}
+
+function shippingBlock(draft: OrderDraft): string {
+  const apt = draft.shipApt.trim();
+  const street = apt ? `${draft.shipStreet.trim()}, ${apt}` : draft.shipStreet.trim();
+  return [
+    draft.shipName.trim(),
+    street,
+    `${draft.shipCity.trim()}, ${draft.shipState.trim()} ${draft.shipZip.trim()}`,
+  ].filter(Boolean).join('\n');
 }
 
 /** Fields FormSubmit turns into the email table. Keys starting with _ are service fields. */
@@ -135,15 +184,28 @@ export function buildSubmission(
   body.Order = lines.join('\n');
 
   for (const product of list.filter(isInSeason)) {
-    const qty = draft.quantities[product.id] ?? 0;
-    if (qty > 0) {
-      body[product.name] = `${qty} ${quantityLabel(product, qty)}`;
+    for (const option of productOptions(product)) {
+      const qty = draft.quantities[optionKey(product.id, option.id)] ?? 0;
+      if (qty > 0) {
+        body[lineLabel(product, option.name)] = `${qty} ${quantityLabelForUnit(option.unit, qty)}`;
+      }
     }
   }
 
-  body.Fulfillment = draft.fulfillment === 'delivery' ? 'Delivery' : 'Pickup';
-  if (draft.fulfillment === 'delivery') {
+  if (draft.fulfillment === 'pickup') {
+    body.Fulfillment = 'Pickup';
+  } else if (draft.fulfillment === 'delivery') {
+    body.Fulfillment = 'Delivery';
     body['Delivery address'] = draft.address.trim();
+  } else if (draft.fulfillment === 'shipping') {
+    body.Fulfillment = 'Shipping';
+    body['Shipping name'] = draft.shipName.trim();
+    body.Street = draft.shipStreet.trim();
+    if (draft.shipApt.trim()) body.Apt = draft.shipApt.trim();
+    body.City = draft.shipCity.trim();
+    body.State = draft.shipState.trim();
+    body.ZIP = draft.shipZip.trim();
+    body['Shipping address'] = shippingBlock(draft);
   }
   body['Preferred date'] = draft.date;
   if (draft.notes.trim()) body.Notes = draft.notes.trim();

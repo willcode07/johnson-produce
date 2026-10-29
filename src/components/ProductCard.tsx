@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Product, formatProductPrice, isInSeason } from '@/lib/products';
+import { Product, formatOptionPrice, formatProductPrice, hasChoiceOptions, isInSeason, productOptions } from '@/lib/products';
 import ProductImageSlider from './ProductImageSlider';
 
 interface ProductCardProps {
@@ -32,10 +32,29 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="space-y-2 mb-4 text-sm">
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-700">Price</span>
-            <span className="font-semibold text-gray-900 text-right">{formatProductPrice(product)}</span>
-          </div>
+          {hasChoiceOptions(product) ? (
+            <div className="space-y-2">
+              <span className="text-gray-700">Price</span>
+              <ul className="space-y-2">
+                {productOptions(product).map((option) => (
+                  <li key={option.id} className="rounded-lg bg-green-50 px-3 py-2">
+                    <div className="flex justify-between gap-3">
+                      <span className="font-medium text-gray-900">{option.name}</span>
+                      <span className="font-semibold text-gray-900 text-right">{formatOptionPrice(option)}</span>
+                    </div>
+                    {option.detail ? (
+                      <p className="text-gray-600 mt-1">{option.detail}</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="flex justify-between gap-4">
+              <span className="text-gray-700">Price</span>
+              <span className="font-semibold text-gray-900 text-right">{formatProductPrice(product)}</span>
+            </div>
+          )}
           <div className="flex justify-between gap-4">
             <span className="text-gray-700">Season</span>
             <span className={available ? 'text-green-700 font-medium' : 'text-gray-500'}>
