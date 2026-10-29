@@ -7,10 +7,11 @@ const IMAGES_DIR = path.join(process.cwd(), 'public', 'images');
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    const filename = decodeURIComponent(params.filename);
+    const { filename: rawFilename } = await params;
+    const filename = decodeURIComponent(rawFilename);
     
     // Security: prevent directory traversal
     if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {

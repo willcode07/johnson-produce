@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { assetPath } from '@/lib/base-path';
 
 interface ProductImageSliderProps {
   images: string[];
@@ -27,7 +28,7 @@ export default function ProductImageSlider({
   if (!images || images.length === 0) {
     return (
       <div className="w-full h-48 bg-gradient-to-br from-green-50 to-amber-50 flex items-center justify-center">
-        <span className="text-6xl">🥭</span>
+        <span className="text-6xl">🍃</span>
       </div>
     );
   }
@@ -36,7 +37,7 @@ export default function ProductImageSlider({
     return (
       <div className="w-full h-48 bg-gradient-to-br from-green-50 to-amber-50 flex items-center justify-center overflow-hidden relative">
         <img 
-          src={images[0]} 
+          src={assetPath(images[0])} 
           alt={productName}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -48,7 +49,7 @@ export default function ProductImageSlider({
           }}
         />
         <div className="image-fallback absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
-          <span className="text-6xl">🥭</span>
+          <span className="text-6xl">🍃</span>
         </div>
       </div>
     );
@@ -78,7 +79,7 @@ export default function ProductImageSlider({
             }`}
           >
             <img 
-              src={image} 
+              src={assetPath(image)} 
               alt={`${productName} - Image ${index + 1}`}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -90,7 +91,7 @@ export default function ProductImageSlider({
               }}
             />
             <div className="image-fallback absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
-              <span className="text-6xl">🥭</span>
+              <span className="text-6xl">🍃</span>
             </div>
           </div>
         ))}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { products, Product } from '@/lib/products';
+import { products, optionsLiteral, Product } from '@/lib/products';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -40,6 +40,9 @@ async function writeProductsToFile(productsList: Product[]): Promise<boolean> {
     image: '${p.image}',
     images: ${imagesStr},
     primaryImageIndex: ${p.primaryImageIndex || 0},
+    price: ${p.price === undefined ? p.pricePerPound : p.price === null ? 'null' : p.price},
+    unit: ${p.unit ? `'${p.unit}'` : 'null'},${optionsLiteral(p.options)}
+    inSeason: ${typeof p.inSeason === 'boolean' ? p.inSeason : p.availability},
     pricePerPound: ${p.pricePerPound},
     availability: ${p.availability},
     season: '${p.season}',

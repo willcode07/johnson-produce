@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "node scripts/build-static.mjs",
     "start": "next start",
-    "export": "next build && next export",
+    "export": "node scripts/build-static.mjs",
     "lint": "eslint"
   },
   "dependencies": {

@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { OrderData } from '@/lib/notion';
+import type { OrderData } from '@/lib/notion';
+
+function isOrderStatus(value: string): value is OrderData['status'] {
+  return value === 'pending'
+    || value === 'confirmed'
+    || value === 'shipped'
+    || value === 'delivered'
+    || value === 'cancelled';
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -38,8 +46,8 @@ export default function OrdersPage() {
 
       if (response.ok) {
         await fetchOrders();
-        if (selectedOrder?.orderId === orderId) {
-          setSelectedOrder({ ...selectedOrder, status: newStatus as any });
+        if (selectedOrder?.orderId === orderId && isOrderStatus(newStatus)) {
+          setSelectedOrder({ ...selectedOrder, status: newStatus });
         }
       } else {
         alert('Failed to update order status');

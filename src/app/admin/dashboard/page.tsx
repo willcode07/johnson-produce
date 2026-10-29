@@ -44,7 +44,7 @@ export default function AdminDashboard() {
         setStats(prev => ({
           ...prev,
           totalOrders: orders.length,
-          pendingOrders: orders.filter((o: any) => o.status === 'pending').length,
+          pendingOrders: orders.filter((order: { status?: string }) => order.status === 'pending').length,
         }));
       }
     } catch (error) {

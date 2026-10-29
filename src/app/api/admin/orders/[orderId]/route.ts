@@ -7,7 +7,7 @@ const notion = new Client({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
     if (!process.env.NOTION_API_KEY || !process.env.NOTION_DATABASE_ID) {
@@ -17,7 +17,8 @@ export async function PUT(
       );
     }
 
-    const orderId = decodeURIComponent(params.orderId);
+    const { orderId: rawOrderId } = await params;
+    const orderId = decodeURIComponent(rawOrderId);
     const { status } = await request.json();
 
     // Find the page with this order ID

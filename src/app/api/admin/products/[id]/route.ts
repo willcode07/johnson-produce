@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { products, Product } from '@/lib/products';
+import { products, optionsLiteral, Product } from '@/lib/products';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -24,6 +24,9 @@ async function writeProductsToFile(productsList: Product[]): Promise<boolean> {
     image: '${p.image}',
     images: ${imagesStr},
     primaryImageIndex: ${p.primaryImageIndex || 0},
+    price: ${p.price === undefined ? p.pricePerPound : p.price === null ? 'null' : p.price},
+    unit: ${p.unit ? `'${p.unit}'` : 'null'},${optionsLiteral(p.options)}
+    inSeason: ${typeof p.inSeason === 'boolean' ? p.inSeason : p.availability},
     pricePerPound: ${p.pricePerPound},
     availability: ${p.availability},
     season: '${p.season}',
@@ -44,10 +47,11 @@ async function writeProductsToFile(productsList: Product[]): Promise<boolean> {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = decodeURIComponent(params.id);
+    const { id } = await params;
+    const productId = decodeURIComponent(id);
     const productData: Partial<Product> = await request.json();
 
     const productsList = await getProductsFromFile();
@@ -92,10 +96,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = decodeURIComponent(params.id);
+    const { id } = await params;
+    const productId = decodeURIComponent(id);
 
     const productsList = await getProductsFromFile();
     const filteredProducts = productsList.filter(p => p.id !== productId);

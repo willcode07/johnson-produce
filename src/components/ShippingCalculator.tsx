@@ -48,7 +48,7 @@ export default function ShippingCalculator() {
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
               placeholder="12345"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              className="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               maxLength={5}
             />
             <button
